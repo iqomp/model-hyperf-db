@@ -3,7 +3,7 @@
 /**
  * Iqomp\Model PDO Driver
  * @package iqomp/model-hyperf-db
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 namespace Iqomp\ModelHyperfDb;
@@ -274,9 +274,9 @@ class Driver implements \Iqomp\Model\DriverInterface
         $db = $this->getDb('write');
 
         if ($ignore) {
-            return $this->exec($db, 'insertOrIgnore', $rows);
+            return $this->exec($db, 'insertOrIgnore', [$rows]);
         } else {
-            return $this->exec($db, 'insert', $rows);
+            return $this->exec($db, 'insert', [$rows]);
         }
 
     }
