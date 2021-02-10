@@ -3,7 +3,7 @@
 /**
  * Iqomp\Model PDO Driver
  * @package iqomp/model-hyperf-db
- * @version 1.0.1
+ * @version 1.0.2
  */
 
 namespace Iqomp\ModelHyperfDb;
@@ -284,7 +284,7 @@ class Driver implements \Iqomp\Model\DriverInterface
     public function dec(array $fields, array $where = []): bool
     {
         foreach ($fields as $field => $value) {
-            $db = $this->getDb('write');
+            $db = $this->getDb('write', $where);
             if (!$this->exec($db, 'decrement', [$field, $value])) {
                 return false;
             }
