@@ -9,3 +9,7 @@ use Hyperf DB as model of module iqomp/model.
 ```bash
 composer require iqomp/model-hyperf-db
 ```
+
+## Configuration
+
+Database connection will be using hyperf databases config.
