@@ -3,7 +3,7 @@
 /**
  * Iqomp\Model PDO Driver
  * @package iqomp/model-hyperf-db
- * @version 2.0.0
+ * @version 2.0.1
  */
 
 namespace Iqomp\ModelHyperfDb;
@@ -417,6 +417,9 @@ class Driver implements \Iqomp\Model\DriverInterface
 
     public function set(array $fields, array $where = []): bool
     {
+        if (!$fields) {
+            return true;
+        }
         $db = $this->getDb('write', $where);
         return (bool)$this->exec($db, 'update', [$fields]);
     }
