@@ -3,7 +3,7 @@
 /**
  * Iqomp\Model PDO Driver
  * @package iqomp/model-hyperf-db
- * @version 2.0.2
+ * @version 2.1.2
  */
 
 namespace Iqomp\ModelHyperfDb;
@@ -244,6 +244,16 @@ class Driver implements \Iqomp\Model\DriverInterface
         return $this->exec($db, 'avg', [$field]);
     }
 
+    public function beginTransaction(): void
+    {
+        Db::beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        Db::commit();
+    }
+
     public function count(array $where = []): int
     {
         $db = $this->getDb('read', $where);
@@ -413,6 +423,11 @@ class Driver implements \Iqomp\Model\DriverInterface
     {
         $db = $this->getDb('write', $where);
         return (bool)$this->exec($db, 'delete');
+    }
+
+    public function rollback(): void
+    {
+        Db::rollBack();
     }
 
     public function set(array $fields, array $where = []): bool
