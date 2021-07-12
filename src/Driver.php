@@ -3,7 +3,7 @@
 /**
  * Iqomp\Model PDO Driver
  * @package iqomp/model-hyperf-db
- * @version 2.0.1
+ * @version 2.0.2
  */
 
 namespace Iqomp\ModelHyperfDb;
@@ -247,7 +247,7 @@ class Driver implements \Iqomp\Model\DriverInterface
     public function count(array $where = []): int
     {
         $db = $this->getDb('read', $where);
-        return $this->exec($db, 'count');
+        return $this->exec($db, 'count') ?? 0;
     }
 
     public function create(array $row, bool $ignore = false): ?int
