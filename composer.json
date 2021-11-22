@@ -3,7 +3,7 @@
     "description": "Hyperf DB driver for iqomp/model",
     "type": "library",
     "license": "MIT",
-    "version": "2.1.2",
+    "version": "2.2.0",
     "authors": [
         {
             "name": "Iqbal Fauzi",

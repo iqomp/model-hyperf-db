@@ -3,7 +3,7 @@
 /**
  * Iqomp\Model PDO Driver
  * @package iqomp/model-hyperf-db
- * @version 2.1.2
+ * @version 2.2.0
  */
 
 namespace Iqomp\ModelHyperfDb;
@@ -17,6 +17,7 @@ class Driver implements \Iqomp\Model\DriverInterface
     protected $table;
     protected $connections;
     protected $config;
+    protected $chains;
 
     protected $last_connection;
 
@@ -67,6 +68,15 @@ class Driver implements \Iqomp\Model\DriverInterface
         return $result;
     }
 
+    protected function makeFieldSelect(string $field): string
+    {
+        if (false !== strstr($field, '.')) {
+            return $field;
+        }
+
+        return $this->getTable() . '.' . $field;
+    }
+
     protected function makeWhere(string $prefix, string $method)
     {
         if ($prefix === 'or') {
@@ -104,6 +114,32 @@ class Driver implements \Iqomp\Model\DriverInterface
     protected function putWhere($db, array $where, string $or = '')
     {
         foreach ($where as $field => $value) {
+            if (false !== strstr($field, '.')) {
+                $fields = explode('.', $field);
+                $table_name = $fields[0];
+                $field_name = $fields[1];
+
+                $chain = $this->chains[$table_name] ?? null;
+                if ($chain) {
+                    $j_method = 'join';
+                    $j_model = $chain['model'];
+
+                    if (isset($chain['type'])) {
+                        $j_method = strtolower($chain['type']) . 'Join';
+                    }
+
+                    $j_table = $j_model::getTable();
+                    $j_self  = $this->getTable() . '.' . $chain['self'];
+                    $j_child = $j_table . '.' . $chain['children'];
+
+                    $db = $db->$j_method($j_table, $j_child, '=', $j_self);
+
+                    $field = $j_table . '.' . $field_name;
+                }
+            }
+
+            $field = $this->makeFieldSelect($field);
+
             if ($field === '$or' || $field === '$and') {
                 $method = $this->makeWhere($or, 'where');
                 $db = $db->$method(function($qry) use ($field, $value) {
@@ -233,9 +269,10 @@ class Driver implements \Iqomp\Model\DriverInterface
 
     public function __construct(array $options)
     {
-        $this->model        = $options['model'];
-        $this->table        = $options['table'];
-        $this->connections  = $options['connections'];
+        $this->model       = $options['model'];
+        $this->table       = $options['table'];
+        $this->connections = $options['connections'];
+        $this->chains      = $options['chains'];
     }
 
     public function avg(string $field, array $where = []): float
@@ -314,6 +351,7 @@ class Driver implements \Iqomp\Model\DriverInterface
         array $order = ['id' => false]
     ): ?object {
         $db = $this->getDb('read', $where, $order);
+        $db = $db->select($this->getTable() . '.*');
         return $this->exec($db, 'first');
     }
 
@@ -324,6 +362,7 @@ class Driver implements \Iqomp\Model\DriverInterface
         array $order = ['id' => false]
     ): array {
         $db = $this->getDb('read', $where, $order, $rpp, $page);
+        $db = $db->select($this->getTable() . '.*');
         $result = $this->exec($db, 'get');
         if (!$result) {
             return [];
